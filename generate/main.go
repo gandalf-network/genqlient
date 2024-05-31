@@ -74,6 +74,7 @@ See https://github.com/Khan/genqlient for full documentation.
 //
 // For lower-level control over genqlient's operation, see [Generate].
 func Main() {
+
 	exitIfError := func(err error) {
 		if err != nil {
 			fmt.Println(err)

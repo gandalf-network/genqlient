@@ -8,3 +8,49 @@ package {{.Config.Package}}
 // Check that context_type from genqlient.yaml implements context.Context.
 var _ {{ref "context.Context"}} = ({{ref .Config.ContextType}})(nil)
 {{end}}
+
+type GandalfClient struct {
+ 	client    *{{ref  "github.com/machinebox/graphql.Client"}}
+    privateKey *{{ref "crypto/ecdsa.PrivateKey"}}
+}
+
+func NewGandalfClient(privateKey string) (*GandalfClient, error) {
+	client :=  {{importAlias "github.com/machinebox/graphql"}}.NewClient("http://localhost:1000/public/gql")
+	privKey, err := HexToECDSAPrivateKey(privateKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse private key: %v", err)
+	}
+	return &GandalfClient{
+		privateKey: privKey,
+		client:     client,
+	}, nil
+}
+
+// HexToECDSAPrivateKey converts a hexadecimal string representing a private key
+// into an *ecdsa.PrivateKey for the secp256k1 curve.
+func HexToECDSAPrivateKey(hexKey string) (*{{ref "crypto/ecdsa.PrivateKey"}}, error) {
+	trimmedHexKey :=  {{importAlias "strings"}}.TrimPrefix(hexKey, "0x")
+
+	privKeyBytes, err :=  hex.DecodeString(trimmedHexKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode hex string: %v", err)
+	}
+
+	privKey, _ := btcec.PrivKeyFromBytes(privKeyBytes)
+
+	return privKey.ToECDSA(), nil
+}
+
+// SignMessage signs a message using the given ECDSA private key.
+func SignMessageAsBase64(privKey *{{ref "crypto/ecdsa.PrivateKey"}}, message []byte) (string , error) {
+	hash := sha256.Sum256(message)
+
+	signature, err := ecdsa.SignASN1(rand.Reader, privKey, hash[:])
+	if err != nil {
+		return "", fmt.Errorf("failed to sign message: %v", err)
+	}
+
+	signatureB64 := base64.StdEncoding.EncodeToString(signature)
+
+	return signatureB64, nil
+}

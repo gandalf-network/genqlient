@@ -2,12 +2,9 @@
 const {{.Name}}_Operation = `{{$.Body}}`
 
 {{.Doc}}
-func {{.Name}}(
+func (c GandalfClient){{funcName .Name}}(
     {{if ne .Config.ContextType "-" -}}
     ctx_ {{ref .Config.ContextType}},
-    {{end}}
-    {{- if not .Config.ClientGetter -}}
-    client_ {{ref "github.com/Khan/genqlient/graphql.Client"}},
     {{end}}
     {{- if .Input -}}
     {{- range .Input.Fields -}}
@@ -16,34 +13,43 @@ func {{.Name}}(
     {{end -}}
     {{end -}}
 ) (*{{.ResponseName}}, {{if .Config.Extensions -}}map[string]interface{},{{end}} error) {
-    req_ := &graphql.Request{
-        OpName: "{{.Name}}",
-        Query:  {{.Name}}_Operation,
-    {{if .Input -}}
-        Variables: &{{.Input.GoName}}{
-        {{range .Input.Fields -}}
-        {{.GoName}}: {{.GraphQLName}},
-        {{end -}}
-        },
+    req := {{importAlias "github.com/machinebox/graphql"}}.NewRequest({{.Name}}_Operation)
+  
+    {{range .Input.Fields -}}
+        req.Var("{{.JSONName}}", {{.GraphQLName}})
     {{end -}}
-    }
-    var err_ error
-    {{if .Config.ClientGetter -}}
-    var client_ graphql.Client
 
-    client_, err_ = {{ref .Config.ClientGetter}}({{if ne .Config.ContextType "-"}}ctx_{{else}}{{end}})
+     requestBodyObj := struct {
+		Query     string                 `json:"query"`
+		Variables map[string]interface{} `json:"variables"`
+	}{
+		Query:     req.Query(),
+		Variables: req.Vars(),
+	}
+
+    var requestBody bytes.Buffer
+	if err := json.NewEncoder(&requestBody).Encode(requestBodyObj); err != nil {
+		return nil, fmt.Errorf("unable to encode body %s", err)
+	}
+
+    var err_ error	
+    signatureB64, err_ := SignMessageAsBase64(c.privateKey, requestBody.Bytes())
     if err_ != nil {
-        return nil, {{if .Config.Extensions -}}nil,{{end -}} err_
-    }
-    {{end}}
-    var data_ {{.ResponseName}}
-    resp_ := &graphql.Response{Data: &data_}
+		return nil, fmt.Errorf("unable to generate signature: %v", err_)
+	}
 
-    err_ = client_.MakeRequest(
-        {{if ne .Config.ContextType "-"}}ctx_{{else}}nil{{end}},
-        req_,
-        resp_,
-    )
-	
-    return &data_, {{if .Config.Extensions -}}resp_.Extensions,{{end -}} err_
+	req.Header.Set("X-Gandalf-Signature", signatureB64)
+
+	var data_ {{.ResponseName}}
+	resp_ := &graphql.Response{Data: &data_}
+
+	if err_ := c.client.Run( 
+        {{if ne .Config.ContextType "-"}}ctx_{{else}}nil{{end}}, 
+        req, 
+        &resp_,
+    ); err_ != nil {
+		return nil, fmt.Errorf("failed to execute request: %v", err_)
+	}
+
+	return &data_, nil
 }

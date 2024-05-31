@@ -33,10 +33,12 @@ func (g *generator) render(tmplRelFilename string, w io.Writer, data interface{}
 	tmpl := g.templateCache[tmplRelFilename]
 	if tmpl == nil {
 		funcMap := template.FuncMap{
-			"ref":      g.ref,
-			"repeat":   repeat,
-			"intRange": intRange,
-			"sub":      sub,
+			"ref":         g.ref,
+			"funcName":    g.funcName,
+			"importAlias": g.getImportAlias,
+			"repeat":      repeat,
+			"intRange":    intRange,
+			"sub":         sub,
 		}
 		var err error
 		tmpl, err = template.New(tmplRelFilename).Funcs(funcMap).ParseFS(templates, tmplRelFilename)
