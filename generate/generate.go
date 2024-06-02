@@ -327,8 +327,6 @@ func Generate(config *Config) (map[string][]byte, error) {
 		return nil, err
 	}
 
-	fmt.Println("HELLO")
-
 	document, err := getAndValidateQueries(config.baseDir, config.Operations, schema)
 	if err != nil {
 		return nil, err
