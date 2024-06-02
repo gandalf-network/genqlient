@@ -358,7 +358,6 @@ func (g *generator) convertDefinition(
 	} else {
 		// Else, construct a name using the usual algorithm (see names.go).
 		name = makeTypeName(namePrefix, def.Name)
-		fmt.Println(name)
 		name = upperFirst(name)
 	}
 
