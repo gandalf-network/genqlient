@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
-	"github.com/Khan/genqlient/internal/testutil"
+	"github.com/gandalf-network/genqlient/internal/testutil"
 )
 
 // AnimalFields includes the GraphQL fields of Animal requested by the fragment AnimalFields.

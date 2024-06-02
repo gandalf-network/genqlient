@@ -13,7 +13,7 @@ func (eye EyeOfSauron){{funcName .Name}}(
     {{end -}}
     {{end -}}
 ) (*{{.ResponseName}}, {{if .Config.Extensions -}}map[string]interface{},{{end}} error) {
-    req := {{ref "github.com/machinebox/graphql.NewRequest"}}({{.Name}}_Operation)
+    req := {{ref "github.com/gandalf-network/gandalf-sdk-go/eyeofsauron/graphql.NewRequest"}}({{.Name}}_Operation)
   
     {{range .Input.Fields -}}
         req.Var("{{.JSONName}}", {{.GraphQLName}})
