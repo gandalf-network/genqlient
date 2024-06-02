@@ -51,6 +51,14 @@ func (g *generator) addImportFor(pkgPath string) (alias string) {
 	return alias
 }
 
+func (g *generator) getImportAlias(pkgPath string) (alias string) {
+	if _, ok := g.imports[pkgPath]; ok {
+		return g.imports[pkgPath]
+	}
+
+	return g.addImportFor(pkgPath)
+}
+
 var _sliceOrMapPrefixRegexp = regexp.MustCompile(`^(\*|\[\d*\]|map\[string\])*`)
 
 // ref takes a Go fully-qualified name, ensures that any necessary symbols are
@@ -102,14 +110,12 @@ func (g *generator) ref(fullyQualifiedName string) (qualifiedName string, err er
 	if pkgPath == g.Config.pkgPath {
 		return prefix + localName, nil
 	}
+
 	alias, ok := g.imports[pkgPath]
 	if !ok {
-		if g.importsLocked {
-			return "", errorf(nil,
-				`genqlient internal error: imports locked but package "%v" has not been imported`, pkgPath)
-		}
 		alias = g.addImportFor(pkgPath)
 	}
+
 	return prefix + alias + "." + localName, nil
 }
 
@@ -129,6 +135,16 @@ func (g *generator) Imports() string {
 			builder.WriteString("\t" + alias + " " + strconv.Quote(path) + "\n")
 		}
 	}
+
 	builder.WriteString(")\n\n")
 	return builder.String()
+}
+
+func (g *generator) funcName(funcName string) string {
+	if len(funcName) == 0 {
+		return funcName
+	}
+	r := []rune(funcName)
+	r[0] = unicode.ToUpper(r[0])
+	return string(r)
 }

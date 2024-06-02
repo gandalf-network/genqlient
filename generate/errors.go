@@ -60,6 +60,10 @@ func (err *genqlientError) Unwrap() error {
 }
 
 func errorf(pos *ast.Position, msg string, args ...interface{}) error {
+	return Errorf(pos, msg, args...)
+}
+
+func Errorf(pos *ast.Position, msg string, args ...interface{}) error {
 	// TODO: alternately accept a filename only, or maybe even a go-parser pos
 
 	// We do all our own wrapping, because if the wrapped error already has a

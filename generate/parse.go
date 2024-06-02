@@ -23,8 +23,9 @@ func getSchema(globs StringList) (*ast.Schema, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	sources := make([]*ast.Source, len(filenames))
+	
 	for i, filename := range filenames {
 		text, err := os.ReadFile(filename)
 		if err != nil {

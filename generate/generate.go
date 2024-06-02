@@ -7,6 +7,7 @@ package generate
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"go/format"
 	"io"
 	"sort"
@@ -320,6 +321,7 @@ func Generate(config *Config) (map[string][]byte, error) {
 	// Step 1: Read in the schema and operations from the files defined by the
 	// config (and validate the operations against the schema).  This is all
 	// defined in parse.go.
+
 	schema, err := getSchema(config.Schema)
 	if err != nil {
 		return nil, err
@@ -388,12 +390,16 @@ func Generate(config *Config) (map[string][]byte, error) {
 		}
 	}
 
+	// pre-import some modules
+	g.addImportFor("github.com/btcsuite/btcd/btcec/v2")
+
 	// Now really glue it all together, and format.
 	var buf bytes.Buffer
 	err = g.render("header.go.tmpl", &buf, g)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("header failed: %w", err)
 	}
+
 	_, err = io.Copy(&buf, &bodyBuf)
 	if err != nil {
 		return nil, err
@@ -420,6 +426,7 @@ func Generate(config *Config) (map[string][]byte, error) {
 		// issue -- it doesn't go in your binary or anything.
 		retval[config.ExportOperations], err = json.MarshalIndent(
 			exportedOperations{Operations: g.Operations}, "", "  ")
+
 		if err != nil {
 			return nil, errorf(nil, "unable to export queries: %v", err)
 		}

@@ -33,6 +33,7 @@ func readConfigGenerateAndWrite(configFilename string) error {
 			return err
 		}
 	}
+	
 
 	generated, err := Generate(config)
 	if err != nil {
@@ -73,7 +74,9 @@ See https://github.com/Khan/genqlient for full documentation.
 //	go run github.com/Khan/genqlient
 //
 // For lower-level control over genqlient's operation, see [Generate].
+
 func Main() {
+
 	exitIfError := func(err error) {
 		if err != nil {
 			fmt.Println(err)
