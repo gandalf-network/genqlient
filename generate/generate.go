@@ -321,6 +321,7 @@ func Generate(config *Config) (map[string][]byte, error) {
 	// Step 1: Read in the schema and operations from the files defined by the
 	// config (and validate the operations against the schema).  This is all
 	// defined in parse.go.
+
 	schema, err := getSchema(config.Schema)
 	if err != nil {
 		return nil, err

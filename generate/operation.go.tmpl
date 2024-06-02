@@ -2,7 +2,7 @@
 const {{.Name}}_Operation = `{{$.Body}}`
 
 {{.Doc}}
-func (c GandalfClient){{funcName .Name}}(
+func (eye EyeOfSauron){{funcName .Name}}(
     {{if ne .Config.ContextType "-" -}}
     ctx_ {{ref .Config.ContextType}},
     {{end}}
@@ -33,7 +33,7 @@ func (c GandalfClient){{funcName .Name}}(
 	}
 
     var err_ error	
-    signatureB64, err_ := SignMessageAsBase64(c.privateKey, requestBody.Bytes())
+    signatureB64, err_ := SignMessageAsBase64(eye.privateKey, requestBody.Bytes())
     if err_ != nil {
 		return nil, fmt.Errorf("unable to generate signature: %v", err_)
 	}
@@ -43,7 +43,7 @@ func (c GandalfClient){{funcName .Name}}(
 	var data_ {{.ResponseName}}
 	resp_ := &graphql.Response{Data: &data_}
 
-	if err_ := c.client.Run( 
+	if err_ := eye.client.Run( 
         {{if ne .Config.ContextType "-"}}ctx_{{else}}nil{{end}}, 
         req, 
         &resp_,
