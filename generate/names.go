@@ -124,13 +124,21 @@ func newPrefixList(item string) *prefixList {
 
 func joinPrefixList(prefix *prefixList) string {
 	var reversed []string
+	seen := make(map[string]struct{})
+
 	for ; prefix != nil; prefix = prefix.tail {
-		reversed = append(reversed, prefix.head)
+		if _, exists := seen[strings.ToLower(prefix.head)]; !exists {
+			reversed = append(reversed, prefix.head)
+			seen[strings.ToLower(prefix.head)] = struct{}{}
+		}
 	}
+
+	// Reverse the order of the reversed slice
 	l := len(reversed)
 	for i := 0; i < l/2; i++ {
 		reversed[i], reversed[l-1-i] = reversed[l-1-i], reversed[i]
 	}
+
 	return strings.Join(reversed, "")
 }
 
@@ -151,12 +159,14 @@ func typeNameParts(prefix *prefixList, typeName string) *prefixList {
 		strings.HasSuffix(joinPrefixList(prefix), typeName) {
 		return prefix
 	}
+
 	return &prefixList{typeName, prefix}
 }
 
 // Given a prefix-list, and a field, compute the next prefix-list, which will
 // be used for that field's selections.
 func nextPrefix(prefix *prefixList, field *ast.Field) *prefixList {
+
 	// Add the type.
 	prefix = typeNameParts(prefix, field.ObjectDefinition.Name)
 	// Add the field (there's no shortening here, see top-of-file comment).

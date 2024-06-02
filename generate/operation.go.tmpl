@@ -13,7 +13,7 @@ func (eye EyeOfSauron){{funcName .Name}}(
     {{end -}}
     {{end -}}
 ) (*{{.ResponseName}}, {{if .Config.Extensions -}}map[string]interface{},{{end}} error) {
-    req := {{importAlias "github.com/machinebox/graphql"}}.NewRequest({{.Name}}_Operation)
+    req := {{ref "github.com/machinebox/graphql.NewRequest"}}({{.Name}}_Operation)
   
     {{range .Input.Fields -}}
         req.Var("{{.JSONName}}", {{.GraphQLName}})
@@ -28,7 +28,7 @@ func (eye EyeOfSauron){{funcName .Name}}(
 	}
 
     var requestBody bytes.Buffer
-	if err := json.NewEncoder(&requestBody).Encode(requestBodyObj); err != nil {
+	if err := {{ref "encoding/json.NewEncoder"}}(&requestBody).Encode(requestBodyObj); err != nil {
 		return nil, fmt.Errorf("unable to encode body %s", err)
 	}
 
@@ -40,9 +40,8 @@ func (eye EyeOfSauron){{funcName .Name}}(
 
 	req.Header.Set("X-Gandalf-Signature", signatureB64)
 
-	var data_ {{.ResponseName}}
-	resp_ := &graphql.Response{Data: &data_}
-
+	var resp_ {{.ResponseName}}
+	
 	if err_ := eye.client.Run( 
         {{if ne .Config.ContextType "-"}}ctx_{{else}}nil{{end}}, 
         req, 
@@ -51,5 +50,5 @@ func (eye EyeOfSauron){{funcName .Name}}(
 		return nil, fmt.Errorf("failed to execute request: %v", err_)
 	}
 
-	return &data_, nil
+	return &resp_, nil
 }

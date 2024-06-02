@@ -113,6 +113,7 @@ func (v *{{.GoName}}) UnmarshalJSON(b []byte) error {
          each field we are handling, which would otherwise conflict.  (We could
          instead suffix the names, but that makes things much harder to read.)
     */}}
+    
     {
         dst := &v.{{$field.GoName}}
         src := firstPass.{{$field.GoName}}
