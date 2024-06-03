@@ -15,7 +15,7 @@ type EyeOfSauron struct {
 }
 
 func NewEyeOfSauron(privateKey string) (*EyeOfSauron, error) {
-	client :=  {{ref "github.com/gandalf-network/gandalf-sdk-go/eyeofsauron/graphql.NewClient"}}("http://localhost:1000/public/gql")
+	client :=  {{ref "github.com/gandalf-network/gandalf-sdk-go/eyeofsauron/graphql.NewClient"}}("https://sauron.gandalf.network/public/gql")
 	privKey, err := HexToECDSAPrivateKey(privateKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse private key: %v", err)

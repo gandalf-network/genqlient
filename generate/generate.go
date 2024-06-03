@@ -392,7 +392,7 @@ func Generate(config *Config) (map[string][]byte, error) {
 
 	// pre-import some modules
 	g.addImportFor("github.com/btcsuite/btcd/btcec/v2")
-
+	
 	// Now really glue it all together, and format.
 	var buf bytes.Buffer
 	err = g.render("header.go.tmpl", &buf, g)
@@ -404,6 +404,9 @@ func Generate(config *Config) (map[string][]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// pre-import uuid module
+	g.addImportFor("github.com/google/uuid")
 
 	unformatted := buf.Bytes()
 	formatted, err := format.Source(unformatted)
